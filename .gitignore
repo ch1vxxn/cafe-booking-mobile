@@ -1,0 +1,12 @@
+# Базы данных и сборка Java
+data/
+target/
+
+# Node.js (фронтенд)
+node_modules/
+dist/
+
+# Настройки IDE
+.idea/
+.vscode/
+_tools/

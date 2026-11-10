@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Базовые стили — как у тебя в хакатонном проекте */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-color: #FAF7F2; /* кремовый фон кафе */
+}
+
+/* Скрываем скроллбар у горизонтальных лент (карточки залов) */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Плавное появление элементов */
+@keyframes fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.list-item-enter {
+  animation: fade-slide-up 0.35s ease-out both;
+}
+
+/* Лёгкое нажатие (как в нативном приложении) */
+.press-scale {
+  transition: transform 0.15s ease-out;
+}
+.press-scale:active {
+  transform: scale(0.96);
+}

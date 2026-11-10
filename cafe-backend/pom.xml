@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  pom.xml — «рецепт» проекта для Maven (система сборки Java).
+
+  Maven читает этот файл и по нему:
+  1) качает все нужные библиотеки (зависимости) из интернета;
+  2) знает, как компилировать и запускать проект;
+  3) умеет собирать итоговый .jar для запуска.
+
+  spring-boot-starter-parent — «родительский» рецепт от Spring Boot:
+  он сам задаёт версии всех библиотек, чтобы они были совместимы
+  между собой. Поэтому нам не нужно вручную подбирать версии.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>3.5.16</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>by.ivan</groupId>
+  <artifactId>cafe-backend</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>cafe-backend</name>
+  <description>Система управления кафе с возможностью бронирования — серверная часть</description>
+
+  <properties>
+    <!-- Компилируем в байт-код Java 21 (работает и на твоём JDK 25) -->
+    <java.version>21</java.version>
+  </properties>
+
+  <dependencies>
+    <!-- 1) Веб-сервер: именно он умеет принимать HTTP-запросы
+           (GET/POST от браузера и телефона) и отдавать ответы. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+
+    <!-- 2) Работа с базой данных через JPA/Hibernate:
+           мы пишем Java-классы (сущности), а Hibernate сам
+           превращает их в таблицы и выполняет SQL. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-data-jpa</artifactId>
+    </dependency>
+
+    <!-- 3) Проверка данных (@Valid): например, что телефон не пустой,
+           а время начала брони передано. Защита от «мусора» на входе. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-validation</artifactId>
+    </dependency>
+
+    <!-- 3.1) Spring Security — авторизация и JWT.
+           Без него не работают ни JwtAuthFilter, ни SecurityConfig,
+           ни BCryptPasswordEncoder. Подключает библиотеки безопасности. -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-security</artifactId>
+    </dependency>
+
+    <!-- 4) H2 — встроенная база данных.
+           Не нужно ничего устанавливать: она живёт внутри нашего
+           приложения, файл БД лежит в папке data/.
+           На защите можно сказать: «для курсовой использую встроенную БД,
+           в проде заменил бы на PostgreSQL, изменив одну строку в конфиге». -->
+    <dependency>
+      <groupId>com.h2database</groupId>
+      <artifactId>h2</artifactId>
+      <scope>runtime</scope>
+    </dependency>
+
+    <!-- 5) JWT (JSON Web Token) — библиотека jjwt для создания
+           и проверки токенов авторизации. Понадобится для JwtUtil. -->
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-api</artifactId>
+      <version>0.12.6</version>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-impl</artifactId>
+      <version>0.12.6</version>
+      <scope>runtime</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.jsonwebtoken</groupId>
+      <artifactId>jjwt-jackson</artifactId>
+      <version>0.12.6</version>
+      <scope>runtime</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <!-- Плагин Spring Boot: умеет запускать приложение (mvn spring-boot:run)
+           и собирать «толстый» jar со всеми библиотеками внутри. -->
+      <plugin>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+</project>
