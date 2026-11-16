@@ -7,13 +7,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * HallController — просмотр залов кафе (публичные GET).
+ * HallController — viewing cafe halls (public GET).
  *
- * GET /api/halls        — список всех залов
- * GET /api/halls/{id}   — один зал по id
+ * GET /api/halls        — list all halls
+ * GET /api/halls/{id}   — one hall by id
  *
- * Доступ открыт всем (см. SecurityConfig): посмотреть кафе можно
- * без логина — это «витрина» для гостя.
+ * Open to all (see SecurityConfig): anyone can browse the cafe
+ * without logging in — it's the "showcase" for guests.
  */
 @RestController
 @RequestMapping("/api/halls")
@@ -33,6 +33,6 @@ public class HallController {
     @GetMapping("/{id}")
     public Hall byId(@PathVariable Long id) {
         return hallRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Зал не найден"));
+                .orElseThrow(() -> new RuntimeException("Hall not found"));
     }
 }

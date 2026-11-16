@@ -7,18 +7,18 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
- * AuthService — бизнес-логика регистрации и входа.
+ * AuthService — registration and login business logic.
  *
- * register(...):  создаёт нового гостя.
- *   - если телефон уже занят — кидаем RuntimeException (контроллер
- *     превратит её в HTTP 400 «Телефон уже зарегистрирован»);
- *   - хэшируем пароль (никогда не храним открытым!);
- *   - роль: если пользователей ещё нет — даём ADMIN (первый всегда админ),
- *     иначе — GUEST. Это упрощение для курсовой, чтобы у тебя сразу
- *     был админ для теста. («В проде роль выдаёт суперадмин».)
+ * register(...):  creates a new guest.
+ *   - if phone is already taken — throw RuntimeException (controller
+ *     turns it into HTTP 400 "Phone already registered");
+ *   - hash the password (never store in plain text!);
+ *   - role: if no users exist yet — assign ADMIN (first user is always admin),
+ *     otherwise — GUEST. This simplifies the coursework so you immediately
+ *     have an admin for testing. ("In production, a super-admin assigns roles.")
  *
- * login(...): ищем по телефону, сверяем пароль через encoder.matches.
- *             Если не совпал — «Неверный телефон или пароль».
+ * login(...): look up by phone, verify password via encoder.matches.
+ *             If mismatch — "Invalid phone or password".
  */
 @Service
 public class AuthService {
@@ -31,30 +31,30 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    /** Регистрация нового пользователя (гостя). */
+    /** Register a new user (guest). */
     public User register(String firstName, String lastName,
                          String phone, String rawPassword) {
         if (userRepository.existsByPhone(phone)) {
-            throw new RuntimeException("Телефон уже зарегистрирован");
+            throw new RuntimeException("Phone already registered");
         }
 
         Role role = userRepository.count() == 0 ? Role.ADMIN : Role.GUEST;
 
         User user = new User(
                 firstName, lastName, phone,
-                passwordEncoder.encode(rawPassword), // хэшируем!
+                passwordEncoder.encode(rawPassword), // hash!
                 role
         );
         return userRepository.save(user);
     }
 
-    /** Проверка логина: телефон + пароль. Возвращает пользователя при успехе. */
+    /** Login check: phone + password. Returns the user on success. */
     public User login(String phone, String rawPassword) {
         User user = userRepository.findByPhone(phone)
-                .orElseThrow(() -> new RuntimeException("Неверный телефон или пароль"));
+                .orElseThrow(() -> new RuntimeException("Invalid phone or password"));
 
         if (!passwordEncoder.matches(rawPassword, user.getPasswordHash())) {
-            throw new RuntimeException("Неверный телефон или пароль");
+            throw new RuntimeException("Invalid phone or password");
         }
         return user;
     }

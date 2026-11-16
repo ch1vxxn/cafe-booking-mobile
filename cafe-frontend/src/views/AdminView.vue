@@ -28,7 +28,7 @@ async function changeStatus(b: BookingDto, status: string) {
   }
 }
 
-// Фильтр на фронте (для скорости; на бэкенде фильтр по ?status= тоже есть)
+// Client-side filter (for speed; backend also supports ?status= filter)
 const filtered = computed(() =>
   filter.value === 'ALL' ? bookings.value : bookings.value.filter(b => b.status === filter.value),
 )
@@ -44,12 +44,12 @@ const statusColor: Record<string, string> = {
 const statusLabel: Record<string, string> = {
   NEW: 'New',
   CONFIRMED: 'Confirmed',
-  COMPLETED: 'Сompleted',
-  CANCELLED: 'Canceled',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
   NO_SHOW: 'No-show',
 }
 
-// Кнопки действий — «кафеский путь»
+// Action buttons — "cafe style"
 const nextActions: Record<string, { label: string; status: string; color: string }[]> = {
   NEW: [
     { label: '✅ Accept', status: 'CONFIRMED', color: 'bg-emerald-50 text-emerald-700' },
@@ -73,7 +73,7 @@ onMounted(load)
         <option value="NEW">New</option>
         <option value="CONFIRMED">Confirmed</option>
         <option value="COMPLETED">Completed</option>
-        <option value="CANCELLED">Canceled</option>
+        <option value="CANCELLED">Cancelled</option>
         <option value="NO_SHOW">No-shows</option>
       </select>
     </div>
@@ -93,7 +93,7 @@ onMounted(load)
       <p class="text-xs text-gray-500">📅 {{ new Date(b.startTime).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) }} — {{ new Date(b.endTime).toLocaleString('ru-RU', { hour: '2-digit', minute: '2-digit' }) }}</p>
       <p class="text-xs text-gray-500">👥 {{ b.guestsCount }} · QR: <code class="text-[10px]">{{ b.qrCode.slice(0, 12) }}…</code></p>
 
-      <!-- Кнопки действия по статусу -->
+      <!-- Action buttons by status -->
       <div v-if="nextActions[b.status]" class="flex gap-2 pt-1">
         <button
           v-for="act in nextActions[b.status]"

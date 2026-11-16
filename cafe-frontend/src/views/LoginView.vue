@@ -24,7 +24,7 @@ async function submit() {
     } else {
       await auth.login(phone.value, password.value)
     }
-    // После входа — на страницу, откуда пришли (или на главную)
+    // After login — go back to the page we came from (or home)
     const redirect = route.query.redirect as string | undefined
     router.push(redirect ?? '/')
   } catch (e: unknown) {
@@ -44,7 +44,7 @@ async function submit() {
     </div>
 
     <div class="bg-white rounded-2xl shadow-sm p-5 space-y-3">
-      <!-- Переключатель: Вход / Регистрация -->
+      <!-- Toggle: Sign in / Register -->
       <div class="flex bg-cafe-cream rounded-xl p-1 text-sm font-medium mb-2">
         <button class="flex-1 py-2 rounded-lg transition-colors" :class="!isRegister ? 'bg-white shadow-sm' : 'text-gray-500'" @click="isRegister = false">Sign in</button>
         <button class="flex-1 py-2 rounded-lg transition-colors" :class="isRegister ? 'bg-white shadow-sm' : 'text-gray-500'" @click="isRegister = true">Register</button>

@@ -15,22 +15,21 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * BookingService — бизнес-логика бронирования.
+ * BookingService — booking business logic.
  *
- * Это СЕРДЦЕ курсовой: здесь живёт главная сетевая логика —
- * проверка, не занят ли стол на выбранное время.
+ * This is the CORE of the application: the main validation logic —
+ * checking whether a table is already booked for the selected time.
  *
- * Логика createBooking:
- *  1) проверяем, что стол существует;
- *  2) проверяем, что время не в прошлом и end > start;
- *  3) ИЩЕМ пересекающиеся брони этого стола (ключевой момент!);
- *     пересечение = старая началась раньше конца новой И
- *                    старая закончится позже начала новой;
- *  4) если пересечение есть — кидаем исключение («стол занят»);
- *  5) если свободно — создаём бронь со статусом NEW и QR-кодом (UUID).
+ * createBooking logic:
+ *  1) verify the table exists;
+ *  2) check that time is not in the past and end > start;
+ *  3) FIND overlapping bookings for this table (key point!);
+ *     overlap = existing booking starts before new end AND
+ *               existing booking ends after new start;
+ *  4) if overlap exists — throw exception ("table already booked");
+ *  5) if free — create booking with status NEW and QR code (UUID).
  *
- * QR-код: уникальная строка, по которой админ находит бронь на входе.
- * Здорово, что всё это можно объяснить преподавателю простыми словами.
+ * QR code: a unique string used by the admin to look up the booking at the entrance.
  */
 @Service
 public class BookingService {
@@ -48,14 +47,14 @@ public class BookingService {
     }
 
     /**
-     * Создать бронь.
+     * Create a booking.
      *
-     * @param user        гость, который бронирует (берём из JWT)
-     * @param tableId     id стола
-     * @param startTime   начало (например 2026-10-22T19:00)
-     * @param endTime     конец   (например 2026-10-22T21:00)
-     * @param guestsCount сколько гостей
-     * @param comment     комментарий (может быть null)
+     * @param user        guest who is booking (from JWT)
+     * @param tableId     table id
+     * @param startTime   start time (e.g. 2026-10-22T19:00)
+     * @param endTime     end time   (e.g. 2026-10-22T21:00)
+     * @param guestsCount number of guests
+     * @param comment     optional comment
      */
     @Transactional
     public Booking createBooking(User user, Long tableId,
@@ -63,32 +62,32 @@ public class BookingService {
                                  int guestsCount, String comment) {
 
         RestaurantTable table = tableRepository.findById(tableId)
-                .orElseThrow(() -> new RuntimeException("Стол не найден"));
+                .orElseThrow(() -> new RuntimeException("Table not found"));
 
-        // Базовые проверки времени — чтобы нельзя было бронировать в прошлом
+        // Basic time checks — prevent booking in the past
         if (startTime.isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("Нельзя бронировать в прошлом");
+            throw new RuntimeException("Cannot book in the past");
         }
         if (!endTime.isAfter(startTime)) {
-            throw new RuntimeException("Время окончания должно быть позже начала");
+            throw new RuntimeException("End time must be after start time");
         }
         if (guestsCount > table.getCapacity()) {
-            throw new RuntimeException("Стол вмещает максимум " + table.getCapacity() + " гостей");
+            throw new RuntimeException("Table max capacity is " + table.getCapacity() + " guests");
         }
 
-        // ============ ГЛАВНОЕ: проверка пересечений ============
-        // Ищем брони этого стола, которые пересекаются с нашим интервалом.
-        // Метод репозитория сам строит SQL:
+        // ============ MAIN: overlap check ============
+        // Find bookings for this table that overlap with our interval.
+        // The repository builds the SQL:
         //   WHERE table_id = ? AND start_time < end AND end_time > start
         List<Booking> overlapping = bookingRepository
                 .findByTableIdAndStartTimeLessThanAndEndTimeGreaterThan(
                         tableId, endTime, startTime);
 
         if (!overlapping.isEmpty()) {
-            throw new RuntimeException("Стол уже занят на это время");
+            throw new RuntimeException("Table already booked for this time slot");
         }
 
-        // Свободно — создаём бронь со статусом NEW и QR-кодом.
+        // Free — create booking with status NEW and QR code.
         Booking booking = new Booking(
                 user, table, startTime, endTime, guestsCount, comment,
                 BookingStatus.NEW,
@@ -98,21 +97,21 @@ public class BookingService {
     }
 
     /**
-     * Найти СВОБОДНЫЕ столы на интервал [from, to] для N гостей.
+     * Find AVAILABLE tables for interval [from, to] for N guests.
      *
-     * Логика (та же, что при создании брони, но наоборот):
-     *  1) берём все столы с нужной вместимостью;
-     *  2) для каждого проверяем: есть ли пересекающаяся бронь?
-     *  3) если нет — стол свободен, добавляем в результат.
+     * Logic (same as when creating a booking, but inverted):
+     *  1) get all tables with the required capacity;
+     *  2) for each, check: is there an overlapping booking?
+     *  3) if none — the table is free, add to the result.
      *
-     * Используется фронтом в реальном времени: когда гость выбирает
-     * дату/время, он сразу видит, какие столы свободны.
+     * Used by the frontend in real time: when the guest selects
+     * date/time, they immediately see which tables are free.
      */
     public List<RestaurantTable> findAvailableTables(LocalDateTime from,
                                                      LocalDateTime to,
                                                      int guests) {
         if (!to.isAfter(from)) {
-            throw new RuntimeException("Время окончания должно быть позже начала");
+            throw new RuntimeException("End time must be after start time");
         }
         List<RestaurantTable> candidates = tableRepository
                 .findByCapacityGreaterThanEqual(guests);
@@ -125,23 +124,23 @@ public class BookingService {
                 .toList();
     }
 
-    /** Список броней конкретного гостя («мои брони»). */
+    /** List of bookings for a specific guest ("my bookings"). */
     public List<Booking> myBookings(User user) {
         return bookingRepository.findByUserId(user.getId());
     }
 
-    /** Отменить бронь (может только владелец). */
+    /** Cancel a booking (owner only). */
     @Transactional
     public void cancelBooking(User user, Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new RuntimeException("Бронь не найдена"));
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
 
         if (!booking.getUser().getId().equals(user.getId())) {
-            throw new RuntimeException("Это чужая бронь");
+            throw new RuntimeException("This is not your booking");
         }
         if (booking.getStatus() == BookingStatus.COMPLETED
                 || booking.getStatus() == BookingStatus.CANCELLED) {
-            throw new RuntimeException("Бронь уже завершена");
+            throw new RuntimeException("Booking has already ended");
         }
 
         booking.setStatus(BookingStatus.CANCELLED);

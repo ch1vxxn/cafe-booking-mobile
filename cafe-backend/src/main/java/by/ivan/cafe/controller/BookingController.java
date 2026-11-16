@@ -15,18 +15,18 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * BookingController — действия гостя с бронями.
+ * BookingController — guest actions with bookings.
  *
- * Все эндпоинты требуют JWT (см. SecurityConfig: /api/bookings/** -> authenticated).
+ * All endpoints require JWT (see SecurityConfig: /api/bookings/** -> authenticated).
  *
- * Как контроллер узнаёт, КТО делает запрос?
- *  - метод получает Authentication (Spring сам подставляет его из SecurityContext);
- *  - из токена мы знаем телефон (subject), по нему находим пользователя в БД.
+ * How does the controller know WHO is making the request?
+ *  - the method receives Authentication (Spring injects it from SecurityContext);
+ *  - from the token we know the phone (subject), then find the user in DB.
  *
- * Эндпоинты:
- *  POST   /api/bookings                — создать бронь
- *  GET    /api/bookings/my             — мои брони
- *  DELETE /api/bookings/{id}           — отменить свою бронь
+ * Endpoints:
+ *  POST   /api/bookings                — create a booking
+ *  GET    /api/bookings/my             — my bookings
+ *  DELETE /api/bookings/{id}           — cancel own booking
  */
 @RestController
 @RequestMapping("/api/bookings")
@@ -40,14 +40,14 @@ public class BookingController {
         this.userRepository = userRepository;
     }
 
-    /** Достаём пользователя из контекста безопасности по телефону. */
+    /** Look up user from security context by phone. */
     private User currentUser(Authentication auth) {
         String phone = (String) auth.getPrincipal();
         return userRepository.findByPhone(phone)
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    /** Создать бронь. */
+    /** Create a booking. */
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody CreateBookingRequest req,
                                     Authentication auth) {
@@ -62,7 +62,7 @@ public class BookingController {
         }
     }
 
-    /** Мои брони. */
+    /** My bookings. */
     @GetMapping("/my")
     public List<BookingDto> my(Authentication auth) {
         User user = currentUser(auth);
@@ -71,7 +71,7 @@ public class BookingController {
                 .toList();
     }
 
-    /** Отменить свою бронь. */
+    /** Cancel own booking. */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> cancel(@PathVariable Long id, Authentication auth) {
         try {

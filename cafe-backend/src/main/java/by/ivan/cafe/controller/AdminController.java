@@ -15,18 +15,18 @@ import java.util.Map;
 import java.util.Optional;
 
 /**
- * AdminController — действия администратора (роль ADMIN).
+ * AdminController — admin actions (role ADMIN).
  *
- * Доступ: только ADMIN (см. SecurityConfig: /api/admin/** -> hasRole ADMIN).
- * Как мы узнаём, что это админ? JWT-фильтр кладёт роль в контекст,
- * Spring Security сам запрещает доступ не-админам (403).
+ * Access: only ADMIN (see SecurityConfig: /api/admin/** -> hasRole ADMIN).
+ * How do we know it's an admin? JWT filter puts the role in the context,
+ * Spring Security itself blocks non-admin access (403).
  *
- * Эндпоинты:
- *  GET   /api/admin/bookings              — все брони (с фильтром по статусу опц.)
- *  PATCH /api/admin/bookings/{id}/status  — сменить статус брони
+ * Endpoints:
+ *  GET   /api/admin/bookings              — all bookings (optional status filter)
+ *  PATCH /api/admin/bookings/{id}/status  — change booking status
  *
- * Смена статуса — и есть «кафеский путь»: позвонил, подтвердил (CONFIRMED),
- * гость пришёл (COMPLETED), не пришёл (NO_SHOW)...
+ * Status change is the "cafe workflow": called — confirmed (CONFIRMED),
+ * guest arrived (COMPLETED), didn't show (NO_SHOW)...
  */
 @RestController
 @RequestMapping("/api/admin")
@@ -40,7 +40,7 @@ public class AdminController {
         this.userRepository = userRepository;
     }
 
-    /** Все брони, опционально фильтр по статусу (?status=CONFIRMED). */
+    /** All bookings, optional status filter (?status=CONFIRMED). */
     @GetMapping("/bookings")
     public List<BookingDto> allBookings(
             @RequestParam(required = false) BookingStatus status,
@@ -51,17 +51,17 @@ public class AdminController {
         return bookings.stream().map(BookingDto::fromEntity).toList();
     }
 
-    /** Сменить статус брони (POST /api/admin/bookings/{id}/status {"status":"CONFIRMED"}). */
+    /** Change booking status (PATCH /api/admin/bookings/{id}/status {"status":"CONFIRMED"}). */
     @PatchMapping("/bookings/{id}/status")
     public ResponseEntity<?> changeStatus(@PathVariable Long id,
                                           @RequestBody Map<String, String> body,
                                           Authentication auth) {
         Booking booking = bookingRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Бронь не найдена"));
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
 
         String statusStr = body.get("status");
         if (statusStr == null) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Поле status обязательно"));
+            return ResponseEntity.badRequest().body(Map.of("error", "Field status is required"));
         }
 
         BookingStatus newStatus;
@@ -69,15 +69,15 @@ public class AdminController {
             newStatus = BookingStatus.valueOf(statusStr.toUpperCase());
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Неверный статус: " + statusStr));
+                    .body(Map.of("error", "Invalid status: " + statusStr));
         }
 
-        // Эффект на лояльность: если бронь завершена — начисляем гостю бонусы
-        // (это наша win-win фишка: постоянные гости накапливают баллы).
+        // Loyalty effect: if booking is completed — award bonus points
+        // (win-win feature: regular guests accumulate points).
         if (newStatus == BookingStatus.COMPLETED
                 && booking.getStatus() != BookingStatus.COMPLETED) {
             User guest = booking.getUser();
-            guest.setBonusPoints(guest.getBonusPoints() + 50); // +50 баллов за визит
+            guest.setBonusPoints(guest.getBonusPoints() + 50); // +50 points per visit
             userRepository.save(guest);
         }
 

@@ -7,9 +7,9 @@ const router = useRouter()
 const auth = useAuthStore()
 
 /**
- * Вкладки нижней навигации.
- * icons — это inline-SVG (не эмодзи!), цвет управляется через currentColor,
- * поэтому иконка сама становится тёмной/серой в зависимости от :class кнопки.
+ * Bottom nav tabs.
+ * icons are inline-SVG (not emoji!), color is controlled via currentColor,
+ * so the icon becomes dark/gray based on the button's :class.
  */
 const tabs = [
   { id: 'home', label: 'Cafe', path: '/', icon: 'home' },
@@ -18,12 +18,12 @@ const tabs = [
   { id: 'profile', label: 'Profile', path: '/profile', icon: 'user' },
 ]
 
-// Если админ — добавляем вкладку «Админ»
+// If admin — add the Admin tab
 if (auth.isAdmin) {
   tabs.push({ id: 'admin', label: 'Admin', path: '/admin', icon: 'gear' })
 }
 
-// SVG-пути иконок (иконки stroke-стиля, как в iOS)
+// SVG icon paths (stroke-style icons, iOS-like)
 const paths: Record<string, string> = {
   home: 'M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5',
   calendar: 'M8 2v4M16 2v4M3 8h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z',
@@ -43,7 +43,7 @@ const paths: Record<string, string> = {
         class="press-scale flex flex-col items-center gap-0.5 px-3 py-1 rounded-full transition-colors min-w-0"
         :class="route.path === tab.path ? 'text-cafe-espresso bg-cafe-cream font-semibold' : 'text-gray-400'"
       >
-        <!-- Inline SVG-иконка: цвет наследуется от currentColor кнопки -->
+        <!-- Inline SVG icon: color inherits from button's currentColor -->
         <svg
           class="w-6 h-6"
           viewBox="0 0 24 24"

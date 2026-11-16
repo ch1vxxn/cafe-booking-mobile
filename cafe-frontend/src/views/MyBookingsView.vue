@@ -13,7 +13,7 @@ async function load() {
   try {
     bookings.value = await api.myBookings()
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Failed to load books'
+    error.value = e instanceof Error ? e.message : 'Failed to load bookings'
   } finally {
     loading.value = false
   }
@@ -28,19 +28,19 @@ async function cancel(id: number) {
   }
 }
 
-// QR-код генерируем через бесплатный API qrserver.com по qrCode из бэкенда.
-// (На защите можно сказать: «QR можно генерировать и на бэкенде
-//  библиотекой ZXing — нагляднее; здесь для простоты внешний сервис».)
+// Generate QR code via the free qrserver.com API using the backend's qrCode
+// (On defense you could say: "QR can be generated on the backend
+// with the ZXing library — more visual; here we use an external service for simplicity".)
 function qrUrl(code: string): string {
   return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(code)}`
 }
 
-// Читаемый формат даты: 22.10 в 19:00
+// Human-readable date format: 22.10 19:00
 function fmt(dt: string): string {
   return new Date(dt).toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 
-// Цвет статуса
+// Status colour
 const statusColor: Record<string, string> = {
   NEW: 'bg-amber-100 text-amber-700',
   CONFIRMED: 'bg-emerald-100 text-emerald-700',
@@ -52,8 +52,8 @@ const statusColor: Record<string, string> = {
 const statusLabel: Record<string, string> = {
   NEW: 'New',
   CONFIRMED: 'Confirmed',
-  COMPLETED: 'Сompleted',
-  CANCELLED: 'Canceled',
+  COMPLETED: 'Completed',
+  CANCELLED: 'Cancelled',
   NO_SHOW: 'No-show',
 }
 
@@ -71,7 +71,7 @@ onMounted(load)
     <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
 
     <template v-if="!loading">
-      <!-- Активные брони -->
+      <!-- Active bookings -->
       <section v-if="active.length">
         <h2 class="text-sm font-semibold text-gray-500 mb-2">Active</h2>
         <div v-for="b in active" :key="b.id" class="list-item-enter bg-white rounded-2xl shadow-sm p-4 space-y-2">
@@ -91,7 +91,7 @@ onMounted(load)
             </button>
           </div>
 
-          <!-- QR-код -->
+          <!-- QR code -->
           <div v-if="showQrFor === b.id" class="flex flex-col items-center pt-2">
             <img :src="qrUrl(b.qrCode)" alt="QR" class="w-40 h-40 rounded-xl" />
             <p class="text-[10px] text-gray-400 mt-1">Show this QR code at the entrance</p>
@@ -99,7 +99,7 @@ onMounted(load)
         </div>
       </section>
 
-      <!-- История -->
+      <!-- History -->
       <section v-if="history.length">
         <h2 class="text-sm font-semibold text-gray-500 mb-2">History</h2>
         <div v-for="b in history" :key="b.id" class="bg-white/60 rounded-2xl p-4 space-y-1 opacity-80">

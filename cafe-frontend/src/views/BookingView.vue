@@ -9,7 +9,7 @@ const router = useRouter()
 
 const preselectTableId = route.query.tableId ? Number(route.query.tableId) : null
 
-// Формируем «завтра» как значение по умолчанию для даты
+// Default date is "tomorrow"
 function tomorrow(): string {
   const d = new Date()
   d.setDate(d.getDate() + 1)
@@ -33,7 +33,7 @@ async function search() {
   success.value = ''
   try {
     tables.value = await api.availableTables(date.value, start.value, end.value, guests.value)
-    // если выбранный стол вдруг занят — сбрасываем выбор
+    // if the pre-selected table is no longer available — reset selection
     if (selectedTableId.value && !tables.value.some(t => t.id === selectedTableId.value)) {
       selectedTableId.value = null
     }
@@ -55,7 +55,7 @@ async function book() {
   loading.value = true
   error.value = ''
   try {
-    // ISO: 2026-10-22T19:00:00 — как ждёт бэкенд
+    // ISO: 2026-10-22T19:00:00 — as expected by the backend
     const startTime = `${date.value}T${start.value}:00`
     const endTime = `${date.value}T${end.value}:00`
     await api.createBooking({
@@ -66,7 +66,7 @@ async function book() {
       comment: comment.value || undefined,
     })
     success.value = '✅ Table booked! View "My Bookings"'
-    await search() // обновляем список свободных столов
+    await search() // refresh available tables list
   } catch (e: unknown) {
     error.value = e instanceof Error ? e.message : 'Booking failed'
   } finally {
@@ -81,7 +81,7 @@ onMounted(search)
   <div class="px-4 pt-6 pb-6 space-y-5">
     <h1 class="text-2xl font-bold text-cafe-espresso">Booking</h1>
 
-    <!-- Форма: дата, время, гости -->
+    <!-- Form: date, time, guests -->
     <div class="bg-white rounded-2xl shadow-sm p-4 space-y-3">
       <div class="grid grid-cols-2 gap-3">
         <label class="text-xs text-gray-500 font-medium">
@@ -107,11 +107,11 @@ onMounted(search)
       </button>
     </div>
 
-    <!-- Ошибки/успех -->
+    <!-- Error / Success -->
     <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
     <p v-if="success" class="text-emerald-600 text-sm font-medium">{{ success }}</p>
 
-    <!-- Свободные столы -->
+    <!-- Available tables -->
     <section v-if="tables.length > 0">
       <h2 class="text-base font-semibold text-cafe-espresso mb-3">Available table</h2>
       <div class="space-y-3">
@@ -132,7 +132,7 @@ onMounted(search)
         </button>
       </div>
 
-      <!-- Комментарий и кнопка брони -->
+      <!-- Comment and book button -->
       <div class="mt-4 bg-white rounded-2xl shadow-sm p-4 space-y-3">
         <input v-model="comment" placeholder="Comment (optional)" class="w-full px-4 py-3 bg-cafe-cream rounded-xl outline-none text-sm" />
         <button @click="book" :disabled="loading || !selectedTableId" class="press-scale w-full py-3.5 rounded-xl bg-cafe-espresso text-white font-semibold disabled:opacity-50">

@@ -12,17 +12,17 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 /**
- * DataSeeder — наполнение базы стартовыми данными при первом запуске.
+ * DataSeeder — populates the database with initial data on first run.
  *
- * CommandLineRunner: Spring запускает этот код ПОСЛЕ старта приложения.
+ * CommandLineRunner: Spring runs this code AFTER application startup.
  *
- * Мы создаём:
- *  - администратора (логин: +375291234567 / пароль: admin123);
- *  - два зала: «Основной» и «Веранда»;
- *  - столы в каждом зале (разной вместимости — чтобы был выбор).
+ * We create:
+ *  - an admin (login: +375291234567 / password: admin123);
+ *  - two halls: "Main Hall" and "Terrace";
+ *  - tables in each hall (different capacities — provides choice).
  *
- * Почему это удобно: сразу после запуска у тебя есть админ и столы,
- * фронт и тесты могут работать без ручного заполнения базы.
+ * Why this is convenient: right after startup you have an admin and tables,
+ * the frontend and tests can work without manually filling the database.
  */
 @Component
 public class DataSeeder implements CommandLineRunner {
@@ -44,7 +44,7 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // ---------- Администратор (создаём только если его ещё нет) ----------
+        // ---------- Admin (only create if not exists) ----------
         if (userRepository.findByPhone("+375291234567").isEmpty()) {
             userRepository.save(new User(
                     "Иван", "Администратор",
@@ -52,10 +52,10 @@ public class DataSeeder implements CommandLineRunner {
                     passwordEncoder.encode("admin123"),
                     Role.ADMIN
             ));
-            System.out.println("Создан администратор: +375291234567 / admin123");
+            System.out.println("Created admin: +375291234567 / admin123");
         }
 
-        // ---------- Залы ----------
+        // ---------- Halls ----------
         Hall main = hallRepository.findByName("Основной зал").orElseGet(() ->
                 hallRepository.save(new Hall(
                         "Основной зал",

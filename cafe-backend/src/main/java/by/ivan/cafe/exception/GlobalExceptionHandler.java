@@ -10,19 +10,19 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * GlobalExceptionHandler — единый обработчик ошибок.
+ * GlobalExceptionHandler — unified error handler.
  *
- * Без него любое RuntimeException вернуло бы клиенту 500 с огромным
- * стектрейсом. С ним мы ловим типичные ошибки и отдаём аккуратный JSON:
+ * Without it, any RuntimeException would return 500 with a huge
+ * stack trace. With it, we catch typical errors and return a clean JSON:
  *
- *   {"error": "Стол уже занят на это время"}
+ *   {"error": "Table already booked for this time slot"}
  *
- * @ControllerAdvice — «перехватчик исключений для всех контроллеров».
+ * @ControllerAdvice — "exception interceptor for all controllers".
  *
- * Обрабатываем:
- *  - RuntimeException      -> 400 Bad Request (наши бизнес-ошибки);
- *  - MethodArgumentNotValidException -> 400 со списком нарушенных полей
- *    (@Valid не прошёл: пустой телефон, пароль короче 4 символов и т.д.).
+ * Handles:
+ *  - RuntimeException      -> 400 Bad Request (our business errors);
+ *  - MethodArgumentNotValidException -> 400 with list of invalid fields
+ *    (@Valid failed: empty phone, password shorter than 4 chars, etc.).
  */
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -40,6 +40,6 @@ public class GlobalExceptionHandler {
         e.getBindingResult().getFieldErrors().forEach(err ->
                 errors.put(err.getField(), err.getDefaultMessage()));
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", "Проверьте поля: " + errors));
+                .body(Map.of("error", "Check fields: " + errors));
     }
 }

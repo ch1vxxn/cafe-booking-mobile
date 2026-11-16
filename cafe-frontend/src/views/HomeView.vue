@@ -46,7 +46,7 @@ onMounted(loadHalls)
 
 <template>
   <div class="px-4 pt-6 pb-4 space-y-5">
-    <!-- Шапка -->
+    <!-- Header -->
     <header class="flex items-center justify-between">
       <div>
         <p class="text-xs text-gray-500 font-medium">
@@ -68,11 +68,11 @@ onMounted(loadHalls)
 
     <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
 
-    <!-- Загрузка -->
+    <!-- Loading -->
     <div v-if="loading" class="text-center text-gray-400 py-10">Loading cafe...</div>
 
     <template v-else>
-      <!-- Список залов (горизонтальная лента) -->
+      <!-- Hall list (horizontal scroll) -->
       <div class="flex gap-3 overflow-x-auto no-scrollbar -mx-4 px-4">
         <button
           v-for="hall in halls"
@@ -85,7 +85,7 @@ onMounted(loadHalls)
         </button>
       </div>
 
-      <!-- Столы выбранного зала -->
+      <!-- Tables of selected hall -->
       <section>
         <h2 class="text-base font-semibold text-cafe-espresso mb-3">Tables</h2>
         <div class="space-y-3">

@@ -11,15 +11,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * TableController — просмотр столов (публичные GET).
+ * TableController — viewing tables (public GET).
  *
- * GET /api/tables?hallId=1        — столы зала (фильтр по залу)
- * GET /api/tables/{id}            — один стол
- * GET /api/tables/available?date=&start=&end=&guests=  — СВОБОДНЫЕ столы
+ * GET /api/tables?hallId=1        — tables in a hall (filter by hall)
+ * GET /api/tables/{id}            — one table
+ * GET /api/tables/available?date=&start=&end=&guests=  — AVAILABLE tables
  *
- * ВАЖНО: эндпоинт /available объявлен в этом контроллере, а НЕ /{id} раньше!
- * Иначе Spring воспримет слово "available" как {id} и попытается
- * превратить его в число -> ошибка "method parameter 'id': Failed to convert".
+ * IMPORTANT: the /available endpoint is declared FIRST in this controller,
+ * NOT /{id}! Otherwise Spring treats "available" as {id} and tries
+ * to convert it to a number -> error "method parameter 'id': Failed to convert".
  */
 @RestController
 @RequestMapping("/api/tables")
@@ -47,11 +47,11 @@ public class TableController {
     }
 
     /**
-     * Свободные столы на интервал.
+     * Available tables for a time interval.
      * GET /api/tables/available?date=2026-10-22&start=19:00&end=21:00&guests=4
      *
-     * Логика: берём ВСЕ столы, подходящие по вместимости, и исключаем те,
-     * у которых есть пересекающаяся бронь (см. BookingService.findAvailableTables).
+     * Logic: take ALL tables matching capacity, exclude those
+     * that have an overlapping booking (see BookingService.findAvailableTables).
      */
     @GetMapping("/available")
     public List<RestaurantTable> available(
@@ -69,6 +69,6 @@ public class TableController {
     @GetMapping("/{id}")
     public RestaurantTable byId(@PathVariable Long id) {
         return tableRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Стол не найден"));
+                .orElseThrow(() -> new RuntimeException("Table not found"));
     }
 }

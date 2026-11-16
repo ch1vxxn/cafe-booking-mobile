@@ -15,16 +15,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * AuthController — HTTP-вход в систему: регистрация и логин.
+ * AuthController — HTTP entry point for registration and login.
  *
- * @RestController — «контроллер», который принимает HTTP-запросы
- * и возвращает JSON. Spring сам превращает Java-объект в JSON.
+ * @RestController is a "controller" that receives HTTP requests
+ * and returns JSON. Spring automatically converts Java objects to JSON.
  *
- * Эндпоинты:
- *  POST /api/auth/register  — создать аккаунт
- *  POST /api/auth/login     — войти, получить токен
+ * Endpoints:
+ *  POST /api/auth/register  — create an account
+ *  POST /api/auth/login     — log in, get a token
  *
- * Под капотом: сервис AuthService + генерация JWT (JwtUtil).
+ * Under the hood: AuthService + JWT generation (JwtUtil).
  */
 @RestController
 @RequestMapping("/api/auth")
@@ -39,9 +39,9 @@ public class AuthController {
     }
 
     /**
-     * Тело запроса — простые JSON-объекты (record). @Valid включает проверки
-     * (@NotBlank — поле не пустое, @Size — минимальная длина пароля).
-     * Так мы отсекаем «мусор» ещё до бизнес-логики.
+     * Request body — simple JSON objects (record). @Valid enables validation
+     * (@NotBlank — field not empty, @Size — minimum password length).
+     * This filters out junk before reaching business logic.
      */
     public record RegisterRequest(
             @NotBlank String firstName,
@@ -63,7 +63,7 @@ public class AuthController {
             String token = jwtUtil.createToken(user.getPhone(), user.getRole().name());
             return ResponseEntity.ok(new AuthResponse(token, UserDto.fromEntity(user)));
         } catch (RuntimeException e) {
-            // «Телефон уже зарегистрирован»
+            // "Phone already registered"
             return ResponseEntity.badRequest().body(error(e.getMessage()));
         }
     }
@@ -75,12 +75,12 @@ public class AuthController {
             String token = jwtUtil.createToken(user.getPhone(), user.getRole().name());
             return ResponseEntity.ok(new AuthResponse(token, UserDto.fromEntity(user)));
         } catch (RuntimeException e) {
-            // «Неверный телефон или пароль»
+            // "Invalid phone or password"
             return ResponseEntity.status(401).body(error(e.getMessage()));
         }
     }
 
-    /** Маленький помощник: оборачивает сообщение об ошибке в {"error": "..."} */
+    /** Little helper: wraps an error message into {"error": "..."} */
     private Map<String, String> error(String message) {
         Map<String, String> map = new HashMap<>();
         map.put("error", message);

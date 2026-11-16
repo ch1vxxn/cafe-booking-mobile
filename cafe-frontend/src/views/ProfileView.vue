@@ -16,7 +16,7 @@ function logout() {
     <h1 class="text-2xl font-bold text-cafe-espresso">Profile</h1>
 
     <div class="bg-white rounded-2xl shadow-sm p-5 space-y-4">
-      <!-- Аватар -->
+      <!-- Avatar -->
       <div class="flex items-center gap-4">
         <div class="w-16 h-16 rounded-full bg-cafe-caramel/20 flex items-center justify-center text-2xl font-bold text-cafe-espresso">
           {{ auth.user?.firstName?.[0] }}{{ auth.user?.lastName?.[0] }}
@@ -25,12 +25,12 @@ function logout() {
           <p class="text-lg font-bold text-cafe-espresso">{{ auth.user?.firstName }} {{ auth.user?.lastName }}</p>
           <p class="text-sm text-gray-500">{{ auth.user?.phone }}</p>
           <span class="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded-full" :class="auth.isAdmin ? 'bg-cafe-espresso text-white' : 'bg-cafe-cream text-cafe-espresso'">
-            {{ auth.isAdmin ? 'Администратор' : 'Гость' }}
+            {{ auth.isAdmin ? 'Admin' : 'Guest' }}
           </span>
         </div>
       </div>
 
-      <!-- Бонусы (лояльность!) -->
+      <!-- Bonus points (loyalty!) -->
       <div class="bg-cafe-cream rounded-xl p-4 flex items-center justify-between">
         <div>
           <p class="text-xs text-gray-500 font-medium">Bonus points</p>
@@ -40,7 +40,7 @@ function logout() {
       </div>
       <p class="text-[11px] text-gray-400 -mt-2">+50 points for every completed visit</p>
 
-      <!-- Если админ — кнопка в админку -->
+      <!-- If admin — button to admin panel -->
       <button
         v-if="auth.isAdmin"
         @click="router.push('/admin')"
@@ -50,7 +50,7 @@ function logout() {
       </button>
 
       <button @click="logout" class="press-scale w-full py-3 rounded-xl bg-red-50 text-red-500 font-semibold">
-        Exit
+        Logout
       </button>
     </div>
   </div>
