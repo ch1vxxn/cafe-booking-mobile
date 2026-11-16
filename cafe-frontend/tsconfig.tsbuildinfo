@@ -1,0 +1,1 @@
+{"root":["./src/api.ts","./src/main.ts","./src/router.ts","./src/types.ts","./src/stores/auth.ts","./src/app.vue","./src/components/bottomnav.vue","./src/views/adminview.vue","./src/views/bookingview.vue","./src/views/homeview.vue","./src/views/loginview.vue","./src/views/mybookingsview.vue","./src/views/profileview.vue","./vite.config.ts"],"version":"5.8.3"}
