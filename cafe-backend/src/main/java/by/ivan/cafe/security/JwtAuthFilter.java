@@ -17,19 +17,20 @@ import java.io.IOException;
 import java.util.List;
 
 /**
- * JwtAuthFilter — «охранник на входе».
+ * JwtAuthFilter — "security guard at the entrance".
  *
- * Каждый HTTP-запрос проходит через этот фильтр. Он:
- *  1) берёт заголовок  Authorization: Bearer <токен>;
- *  2) проверяет токен (подпись + срок) через JwtUtil;
- *  3) если валиден — кладёт «кто это» в SecurityContext.
+ * Every HTTP request passes through this filter. It:
+ *  1) reads the Authorization: Bearer <token> header;
+ *  2) validates the token (signature + expiration) via JwtUtil;
+ *  3) if valid — stores "who it is" in the SecurityContext.
  *
- * SecurityContext — это «текущий пользователь запроса».
- * Дальше любой @RestController может спросить: «кто сейчас делает запрос?»,
- * и Spring подставит данные из контекста.
+ * SecurityContext is the "current user of the request".
+ * Any @RestController can then ask "who is making this request?",
+ * and Spring injects data from the context.
  *
- * Если токена нет или он битый — фильтр просто пропускает запрос дальше
- * без авторизации (а уже SecurityConfig решит, куда пускать без токена).
+ * If there is no token or it's invalid — the filter simply passes the request
+ * without authentication (SecurityConfig then decides where access is allowed
+ * without a token).
  */
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
@@ -48,13 +49,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String header = request.getHeader("Authorization");
 
-        // Если заголовка нет или он не в формате "Bearer ..." — идём дальше
+        // If header is missing or not in "Bearer ..." format — continue
         if (header == null || !header.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String token = header.substring(7); // убираем "Bearer " (7 символов)
+        String token = header.substring(7); // strip "Bearer " (7 chars)
 
         try {
             Claims claims = jwtUtil.parseToken(token);
@@ -62,8 +63,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String role = claims.get("role", String.class);
 
             if (phone != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                // Создаём объект «авторизованный пользователь» и кладём в контекст.
-                // ROLE_ префикс — требование Spring Security (префикс ролей).
+                // Create the "authorized user" object and put it in the context.
+                // ROLE_ prefix is a Spring Security requirement (role prefix).
                 var authentication = new UsernamePasswordAuthenticationToken(
                         phone, null,
                         List.of(new SimpleGrantedAuthority("ROLE_" + role))

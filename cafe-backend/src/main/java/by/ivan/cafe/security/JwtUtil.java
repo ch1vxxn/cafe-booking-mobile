@@ -11,51 +11,51 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 /**
- * JwtUtil — генератор и проверщик JWT-токенов.
+ * JwtUtil — JWT token generator and validator.
  *
- * Что такое JWT (читай вслух на защите):
- *  «JWT — это JSON Web Token. Когда пользователь логинится, сервер
- *   создаёт токен — строку из трёх частей, в которой зашифрованы
- *   имя пользователя, роль и срок действия. Токен подписан секретом,
- *   который знает только сервер, поэтому его нельзя подделать.
- *   Дальше фронт шлёт этот токен с каждым запросом в заголовке
- *   Authorization: Bearer <токен>, и сервер понимает, кто это».
+ * What is JWT (explain during defense):
+ *  "JWT is a JSON Web Token. When a user logs in, the server creates
+ *   a token — a three-part string containing the username, role,
+ *   and expiration date. The token is signed with a secret known
+ *   only to the server, so it cannot be forged.
+ *   The frontend sends this token with every request in the
+ *   Authorization: Bearer <token> header, and the server knows who it is."
  *
- * Три части токена (разделены точками):
+ * Three parts of the token (separated by dots):
  *   header.payload.signature
- *  - header: какой алгоритм подписи;
- *  - payload: сами данные (subject=телефон, role, exp=срок);
- *  - signature: подпись секретом — гарантия подлинности.
+ *  - header: which signing algorithm;
+ *  - payload: the actual data (subject=phone, role, exp=expiration);
+ *  - signature: signed with the secret — guarantees authenticity.
  *
- * createToken(): создаёт токен на 24 часа.
- * parseToken(): проверяет подпись и достаёт данные.
+ * createToken(): creates a token valid for 24 hours.
+ * parseToken(): verifies the signature and extracts data.
  */
 @Component
 public class JwtUtil {
 
-    /** Секрет для подписи. В проде хранят в секретах, для курсовой — в конфиге. */
+    /** Secret key for signing. In production stored in secrets, for coursework — in config. */
     private final SecretKey key;
 
-    /** Время жизни токена в миллисекундах (24 часа). */
+    /** Token lifetime in milliseconds (24 hours). */
     private final long expirationMs;
 
     /**
-     * Конструктор: Spring сам подставит значения из application.properties
-     * (свойства jwt.secret и jwt.expiration-ms, зададим их следом).
+     * Constructor: Spring injects values from application.properties
+     * (properties jwt.secret and jwt.expiration-ms, defined below).
      */
     public JwtUtil(@Value("${jwt.secret}") String secret,
                    @Value("${jwt.expiration-ms}") long expirationMs) {
-        // Из строки-секрета делаем криптографический ключ для подписи (HS256)
+        // Convert secret string to cryptographic key for signing (HS256)
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationMs = expirationMs;
     }
 
     /**
-     * Создаёт токен для пользователя.
+     * Creates a token for a user.
      *
-     * @param subject телефон (уникальный идентификатор пользователя)
-     * @param role    роль (GUEST/ADMIN) — кладём в токен, чтобы не ходить в БД
-     *                при каждом запросе
+     * @param subject phone (unique user identifier)
+     * @param role    role (GUEST/ADMIN) — stored in token to avoid DB lookup
+     *                on every request
      */
     public String createToken(String subject, String role) {
         Date now = new Date();
@@ -71,9 +71,9 @@ public class JwtUtil {
     }
 
     /**
-     * Разбирает токен и возвращает его содержимое (Claims).
-     * Если подпись неверна или срок истёк — кинет исключение,
-     * и мы вернём клиенту 401 Unauthorized.
+     * Parses a token and returns its contents (Claims).
+     * If the signature is invalid or the token expired — throws an exception,
+     * and we return 401 Unauthorized to the client.
      */
     public Claims parseToken(String token) {
         return Jwts.parser()
@@ -83,12 +83,12 @@ public class JwtUtil {
                 .getPayload();
     }
 
-    /** Извлекает телефон (subject) из токена. */
+    /** Extract phone (subject) from token. */
     public String getPhone(String token) {
         return parseToken(token).getSubject();
     }
 
-    /** Извлекает роль из токена. */
+    /** Extract role from token. */
     public String getRole(String token) {
         return parseToken(token).get("role", String.class);
     }

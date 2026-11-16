@@ -70,7 +70,7 @@ public class DataSeeder implements CommandLineRunner {
                         null
                 )));
 
-        // ---------- Столы ----------
+        // ---------- Tables ----------
         seedTable(main, 1, 2, "у окна");
         seedTable(main, 2, 2, "у окна");
         seedTable(main, 3, 4, "в центре зала");
@@ -83,12 +83,12 @@ public class DataSeeder implements CommandLineRunner {
         seedTable(terrace, 3, 6, "с видом на набережную");
         seedTable(terrace, 4, 8, "с видом на набережную");
 
-        System.out.println("Демо-данные готовы: 2 зала, "
-                + tableRepository.count() + " столов, "
-                + userRepository.count() + " пользователей.");
+        System.out.println("Demo data ready: 2 halls, "
+                + tableRepository.count() + " tables, "
+                + userRepository.count() + " users.");
     }
 
-    /** Создать стол, если его ещё нет (по залу + номеру). */
+    /** Create a table if it doesn't exist yet (by hall + number). */
     private void seedTable(Hall hall, int number, int capacity, String location) {
         boolean exists = tableRepository.findAll().stream()
                 .anyMatch(t -> t.getHall().getId().equals(hall.getId())
