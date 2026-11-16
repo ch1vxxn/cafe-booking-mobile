@@ -13,7 +13,7 @@ const preselectTableId = route.query.tableId ? Number(route.query.tableId) : nul
 function tomorrow(): string {
   const d = new Date()
   d.setDate(d.getDate() + 1)
-  return d.toISOString().slice(0, 10) // '2026-10-22'
+  return d.toISOString().slice(0, 10)
 }
 
 const date = ref(tomorrow())
@@ -38,10 +38,10 @@ async function search() {
       selectedTableId.value = null
     }
     if (tables.value.length === 0) {
-      error.value = 'На это время свободных столов нет 😔'
+      error.value = 'No tables available at this time 😔'
     }
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Ошибка поиска'
+    error.value = e instanceof Error ? e.message : 'Search error'
   } finally {
     loading.value = false
   }
@@ -49,7 +49,7 @@ async function search() {
 
 async function book() {
   if (!selectedTableId.value) {
-    error.value = 'Выберите стол'
+    error.value = 'Choose a table'
     return
   }
   loading.value = true
@@ -65,10 +65,10 @@ async function book() {
       guestsCount: guests.value,
       comment: comment.value || undefined,
     })
-    success.value = '✅ Стол забронирован! Смотрите «Мои брони».'
+    success.value = '✅ Table booked! View "My Bookings"'
     await search() // обновляем список свободных столов
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Не удалось забронировать'
+    error.value = e instanceof Error ? e.message : 'Booking failed'
   } finally {
     loading.value = false
   }
@@ -79,31 +79,31 @@ onMounted(search)
 
 <template>
   <div class="px-4 pt-6 pb-6 space-y-5">
-    <h1 class="text-2xl font-bold text-cafe-espresso">Бронирование</h1>
+    <h1 class="text-2xl font-bold text-cafe-espresso">Booking</h1>
 
     <!-- Форма: дата, время, гости -->
     <div class="bg-white rounded-2xl shadow-sm p-4 space-y-3">
       <div class="grid grid-cols-2 gap-3">
         <label class="text-xs text-gray-500 font-medium">
-          Дата
+          Date
           <input v-model="date" type="date" class="mt-1 w-full px-1 py-2.5 bg-cafe-cream rounded-xl outline-none text-sm" />
         </label>
         <label class="text-xs text-gray-500 font-medium">
-          Гости
+          Guests
           <input v-model.number="guests" type="number" min="1" max="12" class="mt-1 w-full px-1 text-center py-3 bg-cafe-cream rounded-xl outline-none text-sm" />
         </label>
         <label class="text-xs text-gray-500 font-medium">
-          Время начала
+          Time start
           <input v-model="start" type="time" class="mt-1 w-full px-1 py-2.5 bg-cafe-cream rounded-xl outline-none text-sm" />
         </label>
         <label class="text-xs text-gray-500 font-medium">
-          Время конца
+          Time end
           <input v-model="end" type="time" class="mt-1 w-full px-1 py-2.5 bg-cafe-cream rounded-xl outline-none text-sm" />
         </label>
       </div>
 
       <button @click="search" :disabled="loading" class="press-scale w-full py-3 rounded-xl bg-cafe-caramel text-white font-semibold disabled:opacity-50">
-        {{ loading ? 'Поиск...' : 'Найти свободные столы' }}
+        {{ loading ? 'Search...' : 'Find a table' }}
       </button>
     </div>
 
@@ -113,7 +113,7 @@ onMounted(search)
 
     <!-- Свободные столы -->
     <section v-if="tables.length > 0">
-      <h2 class="text-base font-semibold text-cafe-espresso mb-3">Свободные столы</h2>
+      <h2 class="text-base font-semibold text-cafe-espresso mb-3">Available table</h2>
       <div class="space-y-3">
         <button
           v-for="t in tables"
@@ -123,20 +123,20 @@ onMounted(search)
           :class="selectedTableId === t.id ? 'ring-2 ring-cafe-caramel' : ''"
         >
           <div class="text-left">
-            <p class="font-semibold text-cafe-espresso">Стол №{{ t.tableNumber }} · {{ t.hall?.name }}</p>
-            <p class="text-xs text-gray-500 mt-0.5">👥 до {{ t.capacity }} мест{{ t.location ? ' · ' + t.location : '' }}</p>
+            <p class="font-semibold text-cafe-espresso">Table №{{ t.tableNumber }} · {{ t.hall?.name }}</p>
+            <p class="text-xs text-gray-500 mt-0.5">👥 Up to {{ t.capacity }} seats{{ t.location ? ' · ' + t.location : '' }}</p>
           </div>
           <span class="text-xs font-semibold" :class="selectedTableId === t.id ? 'text-cafe-caramel' : 'text-gray-400'">
-            {{ selectedTableId === t.id ? '✓ Выбран' : 'Выбрать' }}
+            {{ selectedTableId === t.id ? '✓ Selected' : 'Select' }}
           </span>
         </button>
       </div>
 
       <!-- Комментарий и кнопка брони -->
       <div class="mt-4 bg-white rounded-2xl shadow-sm p-4 space-y-3">
-        <input v-model="comment" placeholder="Комментарий (необязательно)" class="w-full px-4 py-3 bg-cafe-cream rounded-xl outline-none text-sm" />
+        <input v-model="comment" placeholder="Comment (optional)" class="w-full px-4 py-3 bg-cafe-cream rounded-xl outline-none text-sm" />
         <button @click="book" :disabled="loading || !selectedTableId" class="press-scale w-full py-3.5 rounded-xl bg-cafe-espresso text-white font-semibold disabled:opacity-50">
-          {{ loading ? 'Бронируем...' : 'Забронировать' }}
+          {{ loading ? 'Booking...' : 'Book now' }}
         </button>
       </div>
     </section>

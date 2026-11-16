@@ -13,7 +13,7 @@ async function load() {
   try {
     bookings.value = await api.adminBookings()
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Не удалось загрузить брони'
+    error.value = e instanceof Error ? e.message : 'Failed to load bookings'
   } finally {
     loading.value = false
   }
@@ -24,7 +24,7 @@ async function changeStatus(b: BookingDto, status: string) {
     await api.changeStatus(b.id, status)
     await load()
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Не удалось обновить статус'
+    error.value = e instanceof Error ? e.message : 'Failed to update status'
   }
 }
 
@@ -42,22 +42,22 @@ const statusColor: Record<string, string> = {
 }
 
 const statusLabel: Record<string, string> = {
-  NEW: 'Новая',
-  CONFIRMED: 'Подтверждена',
-  COMPLETED: 'Завершена',
-  CANCELLED: 'Отменена',
-  NO_SHOW: 'Не пришёл',
+  NEW: 'New',
+  CONFIRMED: 'Confirmed',
+  COMPLETED: 'Сompleted',
+  CANCELLED: 'Canceled',
+  NO_SHOW: 'No-show',
 }
 
 // Кнопки действий — «кафеский путь»
 const nextActions: Record<string, { label: string; status: string; color: string }[]> = {
   NEW: [
-    { label: '✅ Подтвердить', status: 'CONFIRMED', color: 'bg-emerald-50 text-emerald-700' },
-    { label: '❌ Отменить', status: 'CANCELLED', color: 'bg-red-50 text-red-500' },
+    { label: '✅ Accept', status: 'CONFIRMED', color: 'bg-emerald-50 text-emerald-700' },
+    { label: '❌ Cancel', status: 'CANCELLED', color: 'bg-red-50 text-red-500' },
   ],
   CONFIRMED: [
-    { label: '🏁 Гость пришёл', status: 'COMPLETED', color: 'bg-blue-50 text-blue-700' },
-    { label: '🚫 Не пришёл', status: 'NO_SHOW', color: 'bg-gray-100 text-gray-500' },
+    { label: '🏁 The guest has arrived', status: 'COMPLETED', color: 'bg-blue-50 text-blue-700' },
+    { label: '🚫 No-show', status: 'NO_SHOW', color: 'bg-gray-100 text-gray-500' },
   ],
 }
 
@@ -67,25 +67,25 @@ onMounted(load)
 <template>
   <div class="px-4 pt-6 pb-6 space-y-4">
     <div class="flex items-center justify-between">
-      <h1 class="text-2xl font-bold text-cafe-espresso">Админ</h1>
+      <h1 class="text-2xl font-bold text-cafe-espresso">Admin</h1>
       <select v-model="filter" class="text-sm bg-white rounded-xl px-3 py-2 shadow-sm outline-none">
-        <option value="ALL">Все статусы</option>
-        <option value="NEW">Новые</option>
-        <option value="CONFIRMED">Подтверждённые</option>
-        <option value="COMPLETED">Завершённые</option>
-        <option value="CANCELLED">Отменённые</option>
-        <option value="NO_SHOW">Не пришли</option>
+        <option value="ALL">All statuses</option>
+        <option value="NEW">New</option>
+        <option value="CONFIRMED">Confirmed</option>
+        <option value="COMPLETED">Completed</option>
+        <option value="CANCELLED">Canceled</option>
+        <option value="NO_SHOW">No-shows</option>
       </select>
     </div>
 
-    <p v-if="loading" class="text-center text-gray-400 py-10">Загружаем...</p>
+    <p v-if="loading" class="text-center text-gray-400 py-10">Loading...</p>
     <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
 
-    <div v-if="!loading && filtered.length === 0" class="text-center text-gray-400 py-10">Броней нет</div>
+    <div v-if="!loading && filtered.length === 0" class="text-center text-gray-400 py-10">No bookings</div>
 
     <div v-for="b in filtered" :key="b.id" class="list-item-enter bg-white rounded-2xl shadow-sm p-4 space-y-2">
       <div class="flex items-center justify-between">
-        <p class="font-semibold text-cafe-espresso">Стол №{{ b.tableNumber }} · {{ b.hallName }}</p>
+        <p class="font-semibold text-cafe-espresso">Table №{{ b.tableNumber }} · {{ b.hallName }}</p>
         <span class="text-xs font-medium px-2 py-1 rounded-full" :class="statusColor[b.status]">{{ statusLabel[b.status] }}</span>
       </div>
 

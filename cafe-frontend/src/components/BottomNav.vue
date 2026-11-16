@@ -12,15 +12,15 @@ const auth = useAuthStore()
  * поэтому иконка сама становится тёмной/серой в зависимости от :class кнопки.
  */
 const tabs = [
-  { id: 'home', label: 'Кафе', path: '/', icon: 'home' },
-  { id: 'booking', label: 'Бронь', path: '/booking', icon: 'calendar' },
-  { id: 'my', label: 'Мои', path: '/my-bookings', icon: 'ticket' },
-  { id: 'profile', label: 'Профиль', path: '/profile', icon: 'user' },
+  { id: 'home', label: 'Cafe', path: '/', icon: 'home' },
+  { id: 'booking', label: 'Booking', path: '/booking', icon: 'calendar' },
+  { id: 'my', label: 'My', path: '/my-bookings', icon: 'ticket' },
+  { id: 'profile', label: 'Profile', path: '/profile', icon: 'user' },
 ]
 
 // Если админ — добавляем вкладку «Админ»
 if (auth.isAdmin) {
-  tabs.push({ id: 'admin', label: 'Админ', path: '/admin', icon: 'gear' })
+  tabs.push({ id: 'admin', label: 'Admin', path: '/admin', icon: 'gear' })
 }
 
 // SVG-пути иконок (иконки stroke-стиля, как в iOS)

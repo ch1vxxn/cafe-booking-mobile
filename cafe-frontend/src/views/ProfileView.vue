@@ -13,7 +13,7 @@ function logout() {
 
 <template>
   <div class="px-4 pt-6 pb-6 space-y-5">
-    <h1 class="text-2xl font-bold text-cafe-espresso">Профиль</h1>
+    <h1 class="text-2xl font-bold text-cafe-espresso">Profile</h1>
 
     <div class="bg-white rounded-2xl shadow-sm p-5 space-y-4">
       <!-- Аватар -->
@@ -33,12 +33,12 @@ function logout() {
       <!-- Бонусы (лояльность!) -->
       <div class="bg-cafe-cream rounded-xl p-4 flex items-center justify-between">
         <div>
-          <p class="text-xs text-gray-500 font-medium">Бонусные баллы</p>
+          <p class="text-xs text-gray-500 font-medium">Bonus points</p>
           <p class="text-2xl font-bold text-cafe-espresso">{{ auth.user?.bonusPoints ?? 0 }}</p>
         </div>
         <span class="text-3xl">⭐</span>
       </div>
-      <p class="text-[11px] text-gray-400 -mt-2">+50 баллов за каждый завершённый визит</p>
+      <p class="text-[11px] text-gray-400 -mt-2">+50 points for every completed visit</p>
 
       <!-- Если админ — кнопка в админку -->
       <button
@@ -46,11 +46,11 @@ function logout() {
         @click="router.push('/admin')"
         class="press-scale w-full py-3 rounded-xl bg-cafe-espresso text-white font-semibold"
       >
-        ⚙️ Панель администратора
+        ⚙️ Admin Panel
       </button>
 
       <button @click="logout" class="press-scale w-full py-3 rounded-xl bg-red-50 text-red-500 font-semibold">
-        Выйти
+        Exit
       </button>
     </div>
   </div>

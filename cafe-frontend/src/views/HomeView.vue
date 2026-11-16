@@ -22,7 +22,7 @@ async function loadHalls() {
       await loadTables(halls.value[0].id)
     }
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Не удалось загрузить залы'
+    error.value = e instanceof Error ? e.message : 'Failed to load halls'
   } finally {
     loading.value = false
   }
@@ -32,7 +32,7 @@ async function loadTables(hallId: number) {
   try {
     tables.value = await api.tables(hallId)
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Не удалось загрузить столы'
+    error.value = e instanceof Error ? e.message : 'Failed to load tables'
   }
 }
 
@@ -50,16 +50,16 @@ onMounted(loadHalls)
     <header class="flex items-center justify-between">
       <div>
         <p class="text-xs text-gray-500 font-medium">
-          {{ auth.isLoggedIn ? `Привет, ${auth.user?.firstName}!` : 'Добро пожаловать' }}
+          {{ auth.isLoggedIn ? `Hello, ${auth.user?.firstName}!` : 'Welcome!' }}
         </p>
-        <h1 class="text-2xl font-bold text-cafe-espresso mt-0.5">Наше кафе</h1>
+        <h1 class="text-2xl font-bold text-cafe-espresso mt-0.5">Our Cafe</h1>
       </div>
       <button
         v-if="!auth.isLoggedIn"
         @click="router.push('/login')"
         class="press-scale text-sm font-medium text-cafe-caramel bg-white px-4 py-2 rounded-xl shadow-sm"
       >
-        Войти
+        Sign in
       </button>
       <div v-else class="w-10 h-10 bg-cafe-caramel/20 rounded-full flex items-center justify-center text-lg">
         {{ auth.user?.firstName?.[0] ?? '👤' }}
@@ -69,7 +69,7 @@ onMounted(loadHalls)
     <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
 
     <!-- Загрузка -->
-    <div v-if="loading" class="text-center text-gray-400 py-10">Загружаем кафе...</div>
+    <div v-if="loading" class="text-center text-gray-400 py-10">Loading cafe...</div>
 
     <template v-else>
       <!-- Список залов (горизонтальная лента) -->
@@ -87,7 +87,7 @@ onMounted(loadHalls)
 
       <!-- Столы выбранного зала -->
       <section>
-        <h2 class="text-base font-semibold text-cafe-espresso mb-3">Столы</h2>
+        <h2 class="text-base font-semibold text-cafe-espresso mb-3">Tables</h2>
         <div class="space-y-3">
           <div
             v-for="t in tables"
@@ -95,16 +95,16 @@ onMounted(loadHalls)
             class="list-item-enter bg-white rounded-2xl shadow-sm p-4 flex items-center justify-between"
           >
             <div>
-              <p class="font-semibold text-cafe-espresso">Стол №{{ t.tableNumber }}</p>
+              <p class="font-semibold text-cafe-espresso">Table №{{ t.tableNumber }}</p>
               <p class="text-xs text-gray-500 mt-0.5">
-                👥 до {{ t.capacity }} мест{{ t.location ? ' · ' + t.location : '' }}
+                👥 up to {{ t.capacity }} seats{{ t.location ? ' · ' + t.location : '' }}
               </p>
             </div>
             <button
               @click="router.push({ path: '/booking', query: { tableId: t.id } })"
               class="press-scale text-xs font-semibold text-cafe-caramel bg-cafe-cream px-4 py-2 rounded-xl"
             >
-              Забронировать
+              Book now
             </button>
           </div>
         </div>

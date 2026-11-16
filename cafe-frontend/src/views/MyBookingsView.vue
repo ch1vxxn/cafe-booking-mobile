@@ -13,7 +13,7 @@ async function load() {
   try {
     bookings.value = await api.myBookings()
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Не удалось загрузить брони'
+    error.value = e instanceof Error ? e.message : 'Failed to load books'
   } finally {
     loading.value = false
   }
@@ -24,7 +24,7 @@ async function cancel(id: number) {
     await api.cancelBooking(id)
     await load()
   } catch (e: unknown) {
-    error.value = e instanceof Error ? e.message : 'Не удалось отменить'
+    error.value = e instanceof Error ? e.message : 'Failed to cancel'
   }
 }
 
@@ -50,11 +50,11 @@ const statusColor: Record<string, string> = {
 }
 
 const statusLabel: Record<string, string> = {
-  NEW: 'Новая',
-  CONFIRMED: 'Подтверждена',
-  COMPLETED: 'Завершена',
-  CANCELLED: 'Отменена',
-  NO_SHOW: 'Не пришёл',
+  NEW: 'New',
+  CONFIRMED: 'Confirmed',
+  COMPLETED: 'Сompleted',
+  CANCELLED: 'Canceled',
+  NO_SHOW: 'No-show',
 }
 
 const active = computed(() => bookings.value.filter(b => b.status === 'NEW' || b.status === 'CONFIRMED'))
@@ -65,53 +65,53 @@ onMounted(load)
 
 <template>
   <div class="px-4 pt-6 pb-6 space-y-5">
-    <h1 class="text-2xl font-bold text-cafe-espresso">Мои брони</h1>
+    <h1 class="text-2xl font-bold text-cafe-espresso">My bookings</h1>
 
-    <p v-if="loading" class="text-center text-gray-400 py-10">Загружаем...</p>
+    <p v-if="loading" class="text-center text-gray-400 py-10">Loading...</p>
     <p v-if="error" class="text-red-500 text-sm">{{ error }}</p>
 
     <template v-if="!loading">
       <!-- Активные брони -->
       <section v-if="active.length">
-        <h2 class="text-sm font-semibold text-gray-500 mb-2">Активные</h2>
+        <h2 class="text-sm font-semibold text-gray-500 mb-2">Active</h2>
         <div v-for="b in active" :key="b.id" class="list-item-enter bg-white rounded-2xl shadow-sm p-4 space-y-2">
           <div class="flex items-center justify-between">
-            <p class="font-semibold text-cafe-espresso">Стол №{{ b.tableNumber }} · {{ b.hallName }}</p>
+            <p class="font-semibold text-cafe-espresso">Table №{{ b.tableNumber }} · {{ b.hallName }}</p>
             <span class="text-xs font-medium px-2 py-1 rounded-full" :class="statusColor[b.status]">{{ statusLabel[b.status] }}</span>
           </div>
-          <p class="text-sm text-gray-600">📅 {{ fmt(b.startTime) }} — {{ fmt(b.endTime) }}</p>
-          <p class="text-xs text-gray-500">👥 {{ b.guestsCount }} гостя</p>
+          <p class="text-sm text-gray-600">📅 {{ fmt(b.startTime) }} – {{ fmt(b.endTime) }}</p>
+          <p class="text-xs text-gray-500">👥 {{ b.guestsCount }} guest</p>
 
           <div class="flex gap-2 pt-1">
             <button @click="showQrFor = showQrFor === b.id ? null : b.id" class="press-scale flex-1 py-2 rounded-xl bg-cafe-cream text-cafe-espresso text-sm font-medium">
-              {{ showQrFor === b.id ? 'Скрыть QR' : 'Показать QR' }}
+              {{ showQrFor === b.id ? 'Hide QR' : 'Show QR' }}
             </button>
             <button @click="cancel(b.id)" class="press-scale px-4 py-2 rounded-xl bg-red-50 text-red-500 text-sm font-medium">
-              Отменить
+              Cancel
             </button>
           </div>
 
           <!-- QR-код -->
           <div v-if="showQrFor === b.id" class="flex flex-col items-center pt-2">
             <img :src="qrUrl(b.qrCode)" alt="QR" class="w-40 h-40 rounded-xl" />
-            <p class="text-[10px] text-gray-400 mt-1">Покажите этот QR на входе</p>
+            <p class="text-[10px] text-gray-400 mt-1">Show this QR code at the entrance</p>
           </div>
         </div>
       </section>
 
       <!-- История -->
       <section v-if="history.length">
-        <h2 class="text-sm font-semibold text-gray-500 mb-2">История</h2>
+        <h2 class="text-sm font-semibold text-gray-500 mb-2">History</h2>
         <div v-for="b in history" :key="b.id" class="bg-white/60 rounded-2xl p-4 space-y-1 opacity-80">
           <div class="flex items-center justify-between">
-            <p class="font-semibold text-cafe-espresso">Стол №{{ b.tableNumber }}</p>
+            <p class="font-semibold text-cafe-espresso">Table №{{ b.tableNumber }}</p>
             <span class="text-xs font-medium px-2 py-1 rounded-full" :class="statusColor[b.status]">{{ statusLabel[b.status] }}</span>
           </div>
           <p class="text-xs text-gray-500">📅 {{ fmt(b.startTime) }}</p>
         </div>
       </section>
 
-      <p v-if="!active.length && !history.length" class="text-center text-gray-400 py-10">Пока нет броней. Забронируйте стол!</p>
+      <p v-if="!active.length && !history.length" class="text-center text-gray-400 py-10">No bookings yet. Book a table!</p>
     </template>
   </div>
 </template>
