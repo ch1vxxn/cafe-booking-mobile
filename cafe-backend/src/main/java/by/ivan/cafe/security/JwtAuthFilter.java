@@ -74,8 +74,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
-            // Токен невалиден/просрочен — просто не авторизуем. 
-            // (Spring Security сам вернёт 401 там, где вход обязателен.)
+            // Token invalid/expired — just don't authorize.
+            // (Spring Security returns 401 where authentication is required.)
             SecurityContextHolder.clearContext();
         }
 

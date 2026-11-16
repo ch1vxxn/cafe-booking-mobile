@@ -13,20 +13,20 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 /**
- * SecurityConfig — настройка доступа (Spring Security).
+ * SecurityConfig — access configuration (Spring Security).
  *
- * Здесь мы говорим системе, что можно делать без логина,
- * а что — только авторизованным гостям или только админу.
+ * Here we define what can be accessed without login,
+ * what requires an authenticated user, and what requires admin.
  *
- * Правила:
- *  - /api/auth/register и /api/auth/login — открыты всем (как иначе
- *    зарегистрироваться/войти?);
- *  - GET /api/halls, /api/tables — открыты (посмотреть кафе может любой);
- *  - /api/bookings/** и /api/auth/me — требуют JWT (любой авторизованный);
- *  - /api/admin/** — только с ролью ADMIN.
+ * Rules:
+ *  - /api/auth/register and /api/auth/login — open to all (otherwise how
+ *    would one register/log in?);
+ *  - GET /api/halls, /api/tables — open (anyone can browse the cafe);
+ *  - /api/bookings/** and /api/auth/me — require JWT (any authenticated user);
+ *  - /api/admin/** — ADMIN role only.
  *
- * sessionManagement: создаём БЕЗ сессий (stateless) — мы не храним
- * состояние на сервере, а доверяем JWT. Это современный подход для REST.
+ * sessionManagement: stateless — we don't store server-side state,
+ * we trust JWT. This is the modern REST approach.
  */
 @Configuration
 @EnableWebSecurity
@@ -41,43 +41,43 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // Отключаем CSRF и базовую авторизацию — для REST API не нужны.
+            // Disable CSRF and basic auth — not needed for REST API.
             .csrf(AbstractHttpConfigurer::disable)
-            // Не создаём HTTP-сессии (мы на JWT).
+            // No HTTP sessions (we use JWT).
             .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            // Разрешаем показ H2 Console (она работает через iframe/фреймы).
-            // По умолчанию Spring ставит X-Frame-Options: deny и H2 Console
-            // не отображается в браузере с ошибкой "Refused to display in a frame".
-            // sameOrigin = показывать фреймы только с того же адреса (безопасно).
+            // Allow H2 Console (it uses iframes).
+            // By default Spring sets X-Frame-Options: deny, so H2 Console
+            // won't display in browser with error "Refused to display in a frame".
+            // sameOrigin = allow frames from the same address (safe).
             .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
-            // Отключаем форму логина по умолчанию.
+            // Disable default login form.
             .formLogin(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
-            // Правила доступа:
+            // Access rules:
             .authorizeHttpRequests(auth -> auth
-                // Открытые эндпоинты (без токена):
+                // Open endpoints (no token):
                 .requestMatchers("/api/auth/register", "/api/auth/login", "/h2-console/**").permitAll()
-                // Публичные GET для просмотра кафе:
+                // Public GET for browsing the cafe:
                 .requestMatchers(HttpMethod.GET, "/api/halls/**", "/api/tables/**").permitAll()
-                // АДМИНКА: только для роли ADMIN (авторизация!)
+                // ADMIN: ADMIN role only (authorization!)
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                // Остальные запросы — только авторизованные:
+                // All other requests — authenticated:
                 .anyRequest().authenticated()
             )
-            // Встраиваем наш JWT-фильтр перед стандартным фильтром
-            // UsernamePasswordAuthenticationFilter — чтобы токен
-            // обрабатывался до принятия решения о доступе.
+            // Insert our JWT filter before the standard
+            // UsernamePasswordAuthenticationFilter — so the token
+            // is processed before the access decision.
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
     /**
-     * BCryptPasswordEncoder — хэширование паролей.
-     * Классический вопрос на защите:
-     * «Почему не хранить пароль открыто?» — если база утечёт,
-     * пароли не прочитают. BCrypt сам добавляет «соль» и замедляет
-     * перебор. Сравнение пароля происходит через encoder.matches(...).
+     * BCryptPasswordEncoder — password hashing.
+     * Classic defense question:
+     * "Why not store passwords in plain text?" — if the database leaks,
+     * passwords can't be read. BCrypt adds a "salt" and slows down
+     * brute-force. Password comparison happens via encoder.matches(...).
      */
     @Bean
     public PasswordEncoder passwordEncoder() {
